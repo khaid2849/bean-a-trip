@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: Install dependencies",
+      "type": "shell",
+      "command": "venv/bin/pip install -r requirements.txt",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build"
+    },
+    {
+      "label": "Frontend: Install dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "build"
+    },
+    {
+      "label": "Frontend: Lint",
+      "type": "shell",
+      "command": "npm run lint",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "DB: Migrate (upgrade head)",
+      "type": "shell",
+      "command": "DATABASE_URL=postgresql://postgres:123456@localhost:5432/beanatrip venv/bin/alembic upgrade head",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build"
+    },
+    {
+      "label": "DB: New migration",
+      "type": "shell",
+      "command": "DATABASE_URL=postgresql://postgres:123456@localhost:5432/beanatrip venv/bin/alembic revision --autogenerate -m \"${input:migrationName}\"",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build"
+    },
+    {
+      "label": "MinIO: Start (Docker)",
+      "type": "shell",
+      "command": "docker compose up -d minio",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "migrationName",
+      "type": "promptString",
+      "description": "Migration description (e.g. add_column_to_trips)"
+    }
+  ]
+}

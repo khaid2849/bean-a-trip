@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    // Python
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-python.pylance",
+
+    // Frontend
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+
+    // Database
+    "cweijan.vscode-postgresql-client2",
+
+    // General
+    "mikestead.dotenv",
+    "humao.rest-client"
+  ]
+}
