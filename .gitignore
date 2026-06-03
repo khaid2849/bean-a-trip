@@ -2,7 +2,7 @@
 .env
 .env.local
 .env.*.local
-.vscode/
+vscode/
 
 # Python
 backend/venv/
