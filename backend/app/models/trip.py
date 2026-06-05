@@ -28,6 +28,7 @@ class Trip(Base):
         SAEnum(TripStatus, name="tripstatus"), nullable=False, default=TripStatus.planning
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cover_photo_key: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

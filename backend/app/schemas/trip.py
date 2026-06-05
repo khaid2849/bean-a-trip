@@ -31,6 +31,7 @@ class TripOut(BaseModel):
     name: str
     destination: str
     cover_color: str
+    cover_photo_url: str | None = None
     start_date: str
     end_date: str
     status: TripStatus

@@ -4,7 +4,14 @@ from botocore.exceptions import ClientError
 
 from app.core.config import settings
 
+# Internal client — uses Docker-internal hostname for upload/delete operations.
 _client = None
+
+# Presigned URL client — uses the public-facing URL so browser-accessible
+# presigned URLs are signed against the correct host. AWS v4 signatures
+# include the Host header in their signing scope, so the client used to
+# generate the URL must match the host the browser will use.
+_presigned_client = None
 
 
 def get_minio_client():
@@ -19,6 +26,21 @@ def get_minio_client():
             region_name="us-east-1",
         )
     return _client
+
+
+def _get_presigned_client():
+    global _presigned_client
+    if _presigned_client is None:
+        endpoint = settings.MINIO_PUBLIC_URL or f"http://{settings.MINIO_ENDPOINT}"
+        _presigned_client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            aws_access_key_id=settings.MINIO_ACCESS_KEY,
+            aws_secret_access_key=settings.MINIO_SECRET_KEY,
+            config=BotoConfig(signature_version="s3v4"),
+            region_name="us-east-1",
+        )
+    return _presigned_client
 
 
 def ensure_bucket_exists():
@@ -43,17 +65,12 @@ def upload_file(file_bytes: bytes, object_key: str, content_type: str = "applica
 
 
 def get_presigned_url(object_key: str, expiry: int = 604800) -> str:
-    client = get_minio_client()
-    url = client.generate_presigned_url(
+    client = _get_presigned_client()
+    return client.generate_presigned_url(
         "get_object",
         Params={"Bucket": settings.MINIO_BUCKET, "Key": object_key},
         ExpiresIn=expiry,
     )
-    # Replace internal docker hostname with public URL
-    if settings.MINIO_ENDPOINT and settings.MINIO_PUBLIC_URL:
-        internal = f"http://{settings.MINIO_ENDPOINT}"
-        url = url.replace(internal, settings.MINIO_PUBLIC_URL)
-    return url
 
 
 def delete_file(object_key: str):

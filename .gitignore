@@ -37,6 +37,6 @@ Thumbs.db
 *.swo
 
 # VSCode
-vscode/
+.vscode/
 
 Claude.md
