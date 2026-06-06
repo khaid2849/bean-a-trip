@@ -1,0 +1,139 @@
+/* ── Base / Layout ─────────────────────────────────────────── */
+.fc {
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: transparent;
+}
+.fc .fc-scrollgrid {
+  border-radius: 12px;
+  overflow: hidden;
+  border-color: hsl(var(--border));
+}
+.fc .fc-scrollgrid-section > td { border-color: hsl(var(--border)); }
+.fc td, .fc th { border-color: hsl(var(--border)) !important; }
+
+/* ── Column headers (Sun / Mon / Tue …) ───────────────────── */
+.fc .fc-col-header-cell {
+  background: hsl(var(--muted));
+  padding: 10px 0;
+}
+.fc .fc-col-header-cell-cushion {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none !important;
+}
+
+/* ── Day number cells ──────────────────────────────────────── */
+.fc .fc-daygrid-day-number {
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  padding: 6px 10px;
+  text-decoration: none !important;
+  line-height: 1;
+}
+.fc .fc-daygrid-day:hover .fc-daygrid-day-number {
+  color: hsl(var(--foreground));
+}
+
+/* ── Today highlight ────────────────────────────────────────── */
+.fc .fc-day-today {
+  background: hsl(var(--primary) / 0.08) !important;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 9999px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 6px 8px;
+  font-weight: 600;
+}
+
+/* ── Event pills ────────────────────────────────────────────── */
+.fc .fc-event {
+  border-radius: 4px;
+  border-width: 1px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-bottom: 1px;
+}
+.fc .fc-event:hover { opacity: 0.85; transform: scale(1.01); }
+.fc .fc-event .fc-event-title { font-size: 11px; font-weight: 500; }
+
+/* ── "+X more" link ────────────────────────────────────────── */
+.fc .fc-daygrid-more-link {
+  font-size: 11px;
+  font-weight: 500;
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-top: 1px;
+  text-decoration: none !important;
+}
+.fc .fc-daygrid-more-link:hover {
+  background: hsl(var(--primary) / 0.2);
+}
+
+/* ── Popover ("+X more" expanded) ──────────────────────────── */
+.fc .fc-popover {
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.fc .fc-popover-header {
+  background: hsl(var(--muted));
+  border-radius: 10px 10px 0 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+.fc .fc-popover-body { padding: 8px; }
+
+/* ── Week view time grid ────────────────────────────────────── */
+.fc .fc-timegrid-slot { height: 40px; }
+.fc .fc-timegrid-slot-label-cushion {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+}
+.fc .fc-timegrid-now-indicator-line { border-color: hsl(var(--primary)); }
+.fc .fc-timegrid-now-indicator-arrow { border-top-color: hsl(var(--primary)); }
+
+/* ── Toolbar buttons ────────────────────────────────────────── */
+.fc .fc-button {
+  background: hsl(var(--muted)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  padding: 5px 12px !important;
+  box-shadow: none !important;
+  transition: background 0.15s !important;
+}
+.fc .fc-button:hover { background: hsl(var(--accent)) !important; }
+.fc .fc-button-active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* ── Toolbar title ──────────────────────────────────────────── */
+.fc .fc-toolbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* ── Other-month days ───────────────────────────────────────── */
+.fc .fc-day-other .fc-daygrid-day-number { opacity: 0.3; }

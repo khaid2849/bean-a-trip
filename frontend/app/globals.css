@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --bg-page: #F7F4EF;
+    --bg-surface: #FFFFFF;
+    --bg-muted: #EDE8DF;
+    --bg-subtle: #E4DDD2;
+    --bg-sidebar: #EDE8DF;
+
+    /* Text */
+    --text-primary: #2C2318;
+    --text-secondary: #6B5E4E;
+    --text-tertiary: #9E8E7A;
+    --text-accent: #C0533A;
+    --text-danger: #B5451E;
+    --text-success: #3D6636;
+    --text-warning: #A87020;
+
+    /* Brand — Terracotta (primary) */
+    --terracotta: #C0533A;
+    --terracotta-mid: #D97A62;
+    --terracotta-lt: #F2C4B3;
+    --terracotta-dk: #7A2A15;
+
+    /* Brand — Matcha (success/expenses) */
+    --matcha: #4A6741;
+    --matcha-mid: #7A9E72;
+    --matcha-lt: #C2D9BC;
+    --matcha-dk: #2E4C28;
+
+    /* Brand — Fuji (info/checklist) */
+    --fuji: #8B6B8A;
+    --fuji-mid: #B89EB7;
+    --fuji-lt: #E8D9E7;
+    --fuji-dk: #5A3A59;
+
+    /* Brand — Kincha (warning/bookings) */
+    --kincha: #C48A3F;
+    --kincha-mid: #DEB06A;
+    --kincha-lt: #F5DFB8;
+    --kincha-dk: #7A4E10;
+
+    /* Brand — Asagi (secondary/itinerary) */
+    --asagi: #4E7A8F;
+    --asagi-mid: #7DAFC4;
+    --asagi-lt: #C2DCEA;
+    --asagi-dk: #254D5E;
+
+    /* Borders */
+    --border-default: rgba(44, 35, 24, 0.10);
+    --border-hover: rgba(44, 35, 24, 0.18);
+    --border-strong: rgba(44, 35, 24, 0.30);
+
+    /* shadcn/ui mapping */
+    --background: 45 33% 96%;
+    --foreground: 25 30% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 30% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 30% 14%;
+    --primary: 14 55% 48%;
+    --primary-foreground: 30 60% 97%;
+    --secondary: 35 25% 87%;
+    --secondary-foreground: 25 25% 35%;
+    --muted: 35 20% 87%;
+    --muted-foreground: 25 18% 47%;
+    --accent: 35 25% 87%;
+    --accent-foreground: 25 25% 35%;
+    --destructive: 12 60% 40%;
+    --destructive-foreground: 30 60% 97%;
+    --border: 35 20% 87%;
+    --input: 35 20% 87%;
+    --ring: 14 55% 48%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Backgrounds */
+    --bg-page: #131210;
+    --bg-surface: #1C1A17;
+    --bg-muted: #282420;
+    --bg-subtle: #332E28;
+    --bg-sidebar: #131210;
+
+    /* Text */
+    --text-primary: #EDE8DF;
+    --text-secondary: #A89882;
+    --text-tertiary: #6B5E4E;
+    --text-accent: #E0845F;
+    --text-danger: #E08070;
+    --text-success: #8DC488;
+    --text-warning: #D4A054;
+
+    /* Brand colors adjust for dark */
+    --terracotta: #D97A62;
+    --terracotta-lt: #5A2318;
+    --terracotta-dk: #F2C4B3;
+    --matcha: #7A9E72;
+    --matcha-lt: #1E3A1A;
+    --matcha-dk: #C2D9BC;
+    --fuji: #B89EB7;
+    --fuji-lt: #3D2840;
+    --fuji-dk: #E8D9E7;
+    --kincha: #DEB06A;
+    --kincha-lt: #4A2E08;
+    --kincha-dk: #F5DFB8;
+    --asagi: #7DAFC4;
+    --asagi-lt: #102838;
+    --asagi-dk: #C2DCEA;
+
+    /* Borders */
+    --border-default: rgba(237, 232, 223, 0.08);
+    --border-hover: rgba(237, 232, 223, 0.14);
+    --border-strong: rgba(237, 232, 223, 0.24);
+
+    /* shadcn/ui mapping */
+    --background: 26 10% 9%;
+    --foreground: 35 25% 92%;
+    --card: 25 10% 11%;
+    --card-foreground: 35 25% 92%;
+    --popover: 25 10% 11%;
+    --popover-foreground: 35 25% 92%;
+    --primary: 16 60% 62%;
+    --primary-foreground: 25 20% 8%;
+    --secondary: 25 12% 16%;
+    --secondary-foreground: 35 18% 68%;
+    --muted: 25 12% 16%;
+    --muted-foreground: 25 14% 56%;
+    --accent: 25 12% 16%;
+    --accent-foreground: 35 18% 68%;
+    --destructive: 10 55% 65%;
+    --destructive-foreground: 25 20% 8%;
+    --border: 25 12% 18%;
+    --input: 25 12% 18%;
+    --ring: 16 60% 62%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}

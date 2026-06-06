@@ -1,14 +1,22 @@
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.storage import delete_file, get_presigned_url, upload_file
-from app.models.trip import Trip
+from app.models.trip import Trip, TripStatus
 from app.schemas.trip import TripCreate, TripOut, TripUpdate
 
 router = APIRouter(prefix="/trips", tags=["trips"])
+
+
+def _maybe_activate(trip: Trip, db: Session) -> None:
+    """Promote planning → active when start_date has arrived."""
+    if trip.status == TripStatus.planning and trip.start_date <= date.today().isoformat():
+        trip.status = TripStatus.active
+        db.commit()
 
 
 def _enrich(trip: Trip) -> TripOut:
@@ -24,6 +32,8 @@ def _enrich(trip: Trip) -> TripOut:
 @router.get("", response_model=list[TripOut])
 def list_trips(db: Session = Depends(get_db)):
     trips = db.query(Trip).order_by(Trip.start_date.asc()).all()
+    for trip in trips:
+        _maybe_activate(trip, db)
     return [_enrich(t) for t in trips]
 
 
@@ -41,6 +51,7 @@ def get_trip(trip_id: uuid.UUID, db: Session = Depends(get_db)):
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    _maybe_activate(trip, db)
     return _enrich(trip)
 
 

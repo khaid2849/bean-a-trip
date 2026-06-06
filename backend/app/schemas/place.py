@@ -3,12 +3,10 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.models.place import PlaceType
-
 
 class PlaceCreate(BaseModel):
     name: str
-    type: PlaceType = PlaceType.attraction
+    type: str = "attraction"
     address: str | None = None
     notes: str | None = None
     rating: int | None = None
@@ -17,7 +15,7 @@ class PlaceCreate(BaseModel):
 
 class PlaceUpdate(BaseModel):
     name: str | None = None
-    type: PlaceType | None = None
+    type: str | None = None
     address: str | None = None
     notes: str | None = None
     rating: int | None = None
@@ -28,7 +26,7 @@ class PlaceOut(BaseModel):
     id: uuid.UUID
     trip_id: uuid.UUID
     name: str
-    type: PlaceType
+    type: str
     address: str | None
     notes: str | None
     rating: int | None

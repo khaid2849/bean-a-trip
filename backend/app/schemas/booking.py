@@ -3,11 +3,11 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.models.booking import BookingStatus, BookingType
+from app.models.booking import BookingStatus
 
 
 class BookingCreate(BaseModel):
-    type: BookingType
+    type: str
     title: str
     confirmation_number: str | None = None
     provider: str | None = None
@@ -19,7 +19,7 @@ class BookingCreate(BaseModel):
 
 
 class BookingUpdate(BaseModel):
-    type: BookingType | None = None
+    type: str | None = None
     title: str | None = None
     confirmation_number: str | None = None
     provider: str | None = None
@@ -33,7 +33,7 @@ class BookingUpdate(BaseModel):
 class BookingOut(BaseModel):
     id: uuid.UUID
     trip_id: uuid.UUID
-    type: BookingType
+    type: str
     title: str
     confirmation_number: str | None
     provider: str | None

@@ -24,7 +24,7 @@ class Place(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trip_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    type: Mapped[PlaceType] = mapped_column(SAEnum(PlaceType, name="placetype"), nullable=False, default=PlaceType.attraction)
+    type: Mapped[str] = mapped_column(String, nullable=False, default="attraction")
     address: Mapped[str | None] = mapped_column(String, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
