@@ -1,7 +1,7 @@
 import uuid
 from enum import Enum as PyEnum
 
-from sqlalchemy import DateTime, String, Text, func
+from sqlalchemy import Boolean, DateTime, String, Text, func
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -28,6 +28,7 @@ class Trip(Base):
         SAEnum(TripStatus, name="tripstatus"), nullable=False, default=TripStatus.planning
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_favorite: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     cover_photo_key: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(

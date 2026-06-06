@@ -24,6 +24,7 @@ class TripUpdate(BaseModel):
     end_date: str | None = None
     status: TripStatus | None = None
     notes: str | None = None
+    is_favorite: bool | None = None
 
 
 class TripOut(BaseModel):
@@ -36,6 +37,7 @@ class TripOut(BaseModel):
     end_date: str
     status: TripStatus
     notes: str | None
+    is_favorite: bool
     created_at: datetime
     updated_at: datetime
 

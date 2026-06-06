@@ -112,10 +112,13 @@ export default function DashboardPage() {
   const { data: trips = [], isLoading } = useTrips();
 
   const activeTrip = trips.find(t => t.status === "active");
-  const upcomingTrips = trips.filter(t => t.status === "planning").sort(
-    (a, b) => getDaysUntil(a.start_date) - getDaysUntil(b.start_date)
-  );
-  const completedTrips = trips.filter(t => t.status === "completed");
+  const upcomingTrips = trips.filter(t => t.status === "planning").sort((a, b) => {
+    if (a.is_favorite !== b.is_favorite) return a.is_favorite ? -1 : 1;
+    return getDaysUntil(a.start_date) - getDaysUntil(b.start_date);
+  });
+  const completedTrips = trips
+    .filter(t => t.status === "completed")
+    .sort((a, b) => (a.is_favorite === b.is_favorite ? 0 : a.is_favorite ? -1 : 1));
   const nextTrip = upcomingTrips[0];
   const daysToNext = nextTrip ? getDaysUntil(nextTrip.start_date) : null;
 

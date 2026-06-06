@@ -10,6 +10,7 @@ export interface Trip {
   end_date: string;
   status: TripStatus;
   notes: string | null;
+  is_favorite: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -32,4 +33,5 @@ export interface TripUpdate {
   end_date?: string;
   status?: TripStatus;
   notes?: string;
+  is_favorite?: boolean;
 }

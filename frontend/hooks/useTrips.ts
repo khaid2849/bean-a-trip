@@ -71,6 +71,23 @@ export function useDeleteTrip() {
   });
 }
 
+export function useToggleFavoriteTrip() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.patch<Trip>(`/trips/${id}/favorite`);
+      return data;
+    },
+    onSuccess: (updatedTrip) => {
+      qc.setQueryData<Trip[]>(TRIPS_KEY, (old) =>
+        old?.map((t) => (t.id === updatedTrip.id ? updatedTrip : t)) ?? [updatedTrip]
+      );
+      qc.setQueryData<Trip>([...TRIPS_KEY, updatedTrip.id], updatedTrip);
+    },
+    onError: () => toast.error("Something went wrong"),
+  });
+}
+
 export function useUploadTripCoverPhoto(tripId: string) {
   const qc = useQueryClient();
   return useMutation({

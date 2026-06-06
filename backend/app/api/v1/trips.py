@@ -31,7 +31,7 @@ def _enrich(trip: Trip) -> TripOut:
 
 @router.get("", response_model=list[TripOut])
 def list_trips(db: Session = Depends(get_db)):
-    trips = db.query(Trip).order_by(Trip.start_date.asc()).all()
+    trips = db.query(Trip).order_by(Trip.is_favorite.desc(), Trip.start_date.asc()).all()
     for trip in trips:
         _maybe_activate(trip, db)
     return [_enrich(t) for t in trips]
@@ -64,6 +64,17 @@ def update_trip(trip_id: uuid.UUID, body: TripUpdate, db: Session = Depends(get_
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(trip, field, value)
 
+    db.commit()
+    db.refresh(trip)
+    return _enrich(trip)
+
+
+@router.patch("/{trip_id}/favorite", response_model=TripOut)
+def toggle_favorite(trip_id: uuid.UUID, db: Session = Depends(get_db)):
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    trip.is_favorite = not trip.is_favorite
     db.commit()
     db.refresh(trip)
     return _enrich(trip)

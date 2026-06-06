@@ -52,12 +52,13 @@ function PlaceForm({ defaultValues, onSubmit, isLoading, submitLabel = "Add plac
   const { settings } = useSettings();
   const placeTypes = settings.placeTypes;
 
-  const [name,    setName]    = useState(defaultValues?.name ?? "");
-  const [type,    setType]    = useState(defaultValues?.type ?? placeTypes[0]?.id ?? "attraction");
-  const [address, setAddress] = useState(defaultValues?.address ?? "");
-  const [rating,  setRating]  = useState(defaultValues?.rating ?? 0);
-  const [notes,   setNotes]   = useState(defaultValues?.notes ?? "");
-  const [visited, setVisited] = useState(defaultValues?.visited ?? false);
+  const [name,       setName]       = useState(defaultValues?.name ?? "");
+  const [type,       setType]       = useState(defaultValues?.type ?? placeTypes[0]?.id ?? "attraction");
+  const [address,    setAddress]    = useState(defaultValues?.address ?? "");
+  const [mapPreview, setMapPreview] = useState(defaultValues?.address ?? "");
+  const [rating,     setRating]     = useState(defaultValues?.rating ?? 0);
+  const [notes,      setNotes]      = useState(defaultValues?.notes ?? "");
+  const [visited,    setVisited]    = useState(defaultValues?.visited ?? false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,7 +99,25 @@ function PlaceForm({ defaultValues, onSubmit, isLoading, submitLabel = "Add plac
 
       <div className="space-y-1.5">
         <Label>Address <span className="text-[var(--text-tertiary)]">(optional)</span></Label>
-        <Input placeholder="Enter address or area" value={address} onChange={e => setAddress(e.target.value)} />
+        <Input
+          placeholder="Enter address or area"
+          value={address}
+          onChange={e => setAddress(e.target.value)}
+          onBlur={() => setMapPreview(address)}
+        />
+        {mapPreview && (
+          <div className="overflow-hidden rounded-lg border border-[var(--border-default)]" style={{ height: 180 }}>
+            <iframe
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(mapPreview)}&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Location preview"
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-1.5">
