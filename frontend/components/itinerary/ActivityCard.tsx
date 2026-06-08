@@ -62,9 +62,10 @@ export function ActivityCard({
   const isActive  = selfIndex === activeIndex;
 
   const primaryType = activity.types[0] ?? "other";
-  // Prefer the icon configured in settings; fall back to the static map
+  // Prefer the icon/color configured in settings; fall back to the static map
   const settingsType = settings.activityTypes.find(t => t.id === primaryType);
   const Icon = settingsType ? getIcon(settingsType.icon) : (TYPE_ICON[primaryType as ActivityType] ?? Circle);
+  const primaryColor = settingsType?.color ?? getActivityTypeConfig(primaryType).accentColor;
 
   async function handleUpdate(data: ActivityCreate) {
     await updateActivity(data);
@@ -138,7 +139,7 @@ export function ActivityCard({
       {/* ─── Right: activity card ─────────────────────────────────────────── */}
       <div
         className={cn(
-          "relative flex-1 ml-3 mb-2 rounded-xl border p-3 transition-all duration-300",
+          "relative flex-1 ml-3 mb-2 rounded-xl border border-l-[3px] p-3 transition-all duration-300",
           isDone
             ? "opacity-60 bg-washi-50 dark:bg-sumi-50 border-transparent"
             : isActive
@@ -147,6 +148,7 @@ export function ActivityCard({
             ? "opacity-35 bg-washi-50 dark:bg-sumi-50 border-[var(--border-default)]"
             : "bg-washi-50 dark:bg-sumi-50 border-[var(--border-default)] hover:border-[var(--border-hover)]"
         )}
+        style={!(isDone || isSkipped) ? { borderLeftColor: primaryColor } : undefined}
       >
         {/* "In progress" pill for active station */}
         {isActive && (
@@ -197,14 +199,16 @@ export function ActivityCard({
                 const TIcon = sType ? getIcon(sType.icon) : (TYPE_ICON[t as ActivityType] ?? Circle);
                 const cfg   = getActivityTypeConfig(t);
                 const label = sType?.name ?? cfg.label;
+                const color = sType?.color;
                 return (
                   <span
                     key={t}
                     className={cn(
                       "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium",
-                      cfg.badgeClass,
+                      !color && cfg.badgeClass,
                       (isDone || isSkipped) && "opacity-60"
                     )}
+                    style={color ? { backgroundColor: `${color}18`, color } : undefined}
                   >
                     <TIcon className="h-2.5 w-2.5" />
                     {label}

@@ -85,17 +85,24 @@ export function ActivityForm({ defaultValues, onSubmit, isLoading, submitLabel =
           {types.map(t => {
             const Icon = getIcon(t.icon);
             const active = selected.includes(t.id);
+            const color = t.color;
             return (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => toggleType(t.id)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                  active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-muted"
+                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
+                  active && !color ? "border-primary bg-primary text-primary-foreground" : "",
+                  !active ? "border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-muted" : ""
                 )}
+                style={
+                  active && color
+                    ? { borderColor: color, backgroundColor: `${color}18`, color }
+                    : !active && color
+                    ? { borderColor: "var(--border-default)" }
+                    : undefined
+                }
               >
                 <Icon className="h-3.5 w-3.5" />
                 {t.name}

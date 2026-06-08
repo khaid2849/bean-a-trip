@@ -15,6 +15,7 @@ import { useNotes, useCreateNote, useUpdateNote, useDeleteNote } from "@/hooks/u
 import { api } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media";
 import type { TripPhoto } from "@/types/photo";
 import type { Note } from "@/types/note";
 
@@ -70,7 +71,7 @@ function PhotoLightbox({
           <div className="relative flex-1 bg-black flex items-center justify-center min-h-[260px] sm:min-h-[480px]">
             <img
               key={current.id}
-              src={current.url}
+              src={mediaUrl(current.url)}
               alt={current.caption || current.file_name}
               className="max-h-[55vh] sm:max-h-[80vh] w-full object-contain"
             />
@@ -387,7 +388,7 @@ export default function JournalsPage({ params }: { params: { id: string } }) {
                 onClick={() => setLightbox(photo)}
               >
                 <img
-                  src={photo.url}
+                  src={mediaUrl(photo.url)}
                   alt={photo.caption || photo.file_name}
                   className="h-full w-full object-cover transition-opacity group-hover:opacity-85"
                   loading="lazy"
@@ -453,7 +454,7 @@ export default function JournalsPage({ params }: { params: { id: string } }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 hidden h-7 w-7 text-[var(--text-tertiary)] hover:text-[var(--text-danger)] group-hover:flex"
+                  className="absolute right-2 top-2 flex h-7 w-7 text-[var(--text-tertiary)] hover:text-[var(--text-danger)] md:hidden md:group-hover:flex"
                   onClick={e => { e.stopPropagation(); deleteNote(note.id); }}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

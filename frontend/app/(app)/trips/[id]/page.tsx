@@ -21,6 +21,7 @@ import { usePhotos } from "@/hooks/usePhotos";
 import { useWeather } from "@/hooks/useWeather";
 import { getDaysUntil, formatDateRange, getTripDuration } from "@/lib/trip-utils";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media";
 import type { Trip } from "@/types/trip";
 
 // ── WMO weather codes ────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ function CountdownCard({ startDate }: { startDate: string }) {
                 <span className="text-[9px] font-medium uppercase tracking-widest text-[var(--text-tertiary)]">
                   {l}
                 </span>
-                <span className="text-[2.25rem] font-medium tabular-nums leading-none text-[var(--text-primary)]">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-medium tabular-nums leading-none text-[var(--text-primary)]">
                   {String(v).padStart(2, "0")}
                 </span>
               </div>
@@ -291,7 +292,7 @@ export default function TripPage({ params }: { params: { id: string } }) {
       >
         {trip.cover_photo_url ? (
           <img
-            src={trip.cover_photo_url}
+            src={mediaUrl(trip.cover_photo_url)}
             alt={trip.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
@@ -359,7 +360,7 @@ export default function TripPage({ params }: { params: { id: string } }) {
 
       {/* ── Countdown + Weather ───────────────────────────────────────────── */}
       {showTimeline && (
-        <div className={cn("grid gap-3", showCountdown && showWeather ? "grid-cols-2" : "grid-cols-1")}>
+        <div className={cn("grid gap-3", showCountdown && showWeather ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1")}>
 
           {showCountdown && <CountdownCard startDate={trip.start_date} />}
 
@@ -435,7 +436,7 @@ export default function TripPage({ params }: { params: { id: string } }) {
       {/* ── Section grid ─────────────────────────────────────────────────── */}
       <div>
         {/* Header + quick-access pills */}
-        <div className="mb-3 flex items-center justify-between gap-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-tertiary)]">
             Trip sections
           </p>

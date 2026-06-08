@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft, Plus, Trash2, Wallet, Settings, Pencil,
-  UtensilsCrossed, Car, BedDouble, Zap, ShoppingBag, Circle,
-} from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Wallet, Settings, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BentoGrid } from "@/components/bento/BentoGrid";
@@ -15,47 +12,10 @@ import { BudgetSetup } from "@/components/expenses/BudgetSetup";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { EditExpenseDialog } from "@/components/expenses/EditExpenseDialog";
 import { useExpenses, useExpenseSummary, useCreateExpense, useDeleteExpense } from "@/hooks/useExpenses";
+import { useSettings } from "@/context/SettingsContext";
+import { getIcon } from "@/lib/icon-registry";
 import { cn } from "@/lib/utils";
 import type { Expense } from "@/types/expense";
-
-type CategoryFilter = "All" | "Food" | "Transport" | "Accommodation" | "Activities" | "Shopping" | "Other";
-
-const CATEGORY_CHIPS: { label: CategoryFilter; icon?: React.ComponentType<{ className?: string }> }[] = [
-  { label: "All" },
-  { label: "Food",          icon: UtensilsCrossed },
-  { label: "Transport",     icon: Car },
-  { label: "Accommodation", icon: BedDouble },
-  { label: "Activities",    icon: Zap },
-  { label: "Shopping",      icon: ShoppingBag },
-  { label: "Other",         icon: Circle },
-];
-
-const CATEGORY_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
-  Food:          UtensilsCrossed,
-  Transport:     Car,
-  Accommodation: BedDouble,
-  Activities:    Zap,
-  Shopping:      ShoppingBag,
-  Other:         Circle,
-};
-
-const CATEGORY_ICON_STYLE: Record<string, string> = {
-  Food:          "bg-terracotta-lt dark:bg-[#5A2318] text-terracotta dark:text-terracotta-lt",
-  Transport:     "bg-asagi-lt dark:bg-[#102838] text-asagi dark:text-asagi-lt",
-  Accommodation: "bg-kincha-lt dark:bg-[#4A2E08] text-kincha dark:text-kincha-lt",
-  Activities:    "bg-fuji-lt dark:bg-[#3D2840] text-fuji dark:text-fuji-lt",
-  Shopping:      "bg-matcha-lt dark:bg-[#1E3A1A] text-matcha dark:text-matcha-lt",
-  Other:         "bg-washi-100 dark:bg-sumi-100 text-washi-600 dark:text-[#A89882]",
-};
-
-const CATEGORY_BADGE: Record<string, string> = {
-  Food:          "bg-terracotta-lt dark:bg-[#5A2318] text-terracotta-dk dark:text-terracotta-lt",
-  Transport:     "bg-asagi-lt dark:bg-[#102838] text-asagi-dk dark:text-asagi-lt",
-  Accommodation: "bg-kincha-lt dark:bg-[#4A2E08] text-kincha-dk dark:text-kincha-lt",
-  Activities:    "bg-fuji-lt dark:bg-[#3D2840] text-fuji-dk dark:text-fuji-lt",
-  Shopping:      "bg-matcha-lt dark:bg-[#1E3A1A] text-matcha-dk dark:text-matcha-lt",
-  Other:         "bg-washi-100 dark:bg-sumi-100 text-washi-600 dark:text-[#A89882]",
-};
 
 function fmt(n: number) { return `$${Number(n).toFixed(2)}`; }
 
@@ -71,11 +31,24 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
   const { data: summary } = useExpenseSummary(tripId);
   const { mutateAsync: createExpense, isPending: isExpenseCreating } = useCreateExpense(tripId);
   const { mutateAsync: deleteExpense } = useDeleteExpense(tripId);
+  const { settings } = useSettings();
+  const categories = settings.expenseCategories;
 
   const [addOpen, setAddOpen] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  function getCatConfig(catId: string) {
+    return categories.find(c => c.id === catId);
+  }
+  function getCatColor(catId: string) {
+    return getCatConfig(catId)?.color ?? "#9E8E7A";
+  }
+  function getCatIcon(catId: string) {
+    const cfg = getCatConfig(catId);
+    return cfg ? getIcon(cfg.icon) : getIcon("Circle");
+  }
 
   const budgetItems = data?.budget_items ?? [];
   const expenses = data?.expenses ?? [];
@@ -103,7 +76,7 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link href={`/trips/${tripId}`}>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -115,7 +88,7 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
             <p className="text-sm text-[var(--text-tertiary)]">{expenses.length} transactions</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-end sm:self-auto">
           <button
             className="inline-flex items-center gap-1.5 rounded-lg bg-matcha px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-matcha-mid"
             onClick={() => setBudgetOpen(true)}
@@ -132,10 +105,10 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* KPI Stat Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-4">
-          <p className="text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Total Budget</p>
-          <p className="mt-1 text-2xl font-medium text-[var(--text-primary)]">
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-3 md:p-4">
+          <p className="text-[10px] md:text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Budget</p>
+          <p className="mt-1 text-lg md:text-2xl font-medium text-[var(--text-primary)]">
             {summary && summary.total_budget > 0 ? fmt(summary.total_budget) : "—"}
           </p>
           {(!summary || summary.total_budget === 0) && (
@@ -143,24 +116,24 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
               onClick={() => setBudgetOpen(true)}
               className="mt-1 text-xs text-matcha hover:underline"
             >
-              Set budget →
+              Set →
             </button>
           )}
         </div>
-        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-4">
-          <p className="text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Spent</p>
-          <p className="mt-1 text-2xl font-medium text-terracotta">
+        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-3 md:p-4">
+          <p className="text-[10px] md:text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Spent</p>
+          <p className="mt-1 text-lg md:text-2xl font-medium text-terracotta">
             {summary ? fmt(summary.total_spent) : "—"}
           </p>
         </div>
-        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-4">
-          <p className="text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Remaining</p>
+        <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-3 md:p-4">
+          <p className="text-[10px] md:text-xs uppercase tracking-wide text-[var(--text-tertiary)]">Remaining</p>
           {summary && summary.total_budget > 0 ? (
-            <p className={cn("mt-1 text-2xl font-medium", summary.remaining >= 0 ? "text-matcha" : "text-[var(--text-danger)]")}>
+            <p className={cn("mt-1 text-lg md:text-2xl font-medium", summary.remaining >= 0 ? "text-matcha" : "text-[var(--text-danger)]")}>
               {summary.remaining < 0 ? "-" : ""}{fmt(Math.abs(summary.remaining))}
             </p>
           ) : (
-            <p className="mt-1 text-2xl font-medium text-[var(--text-primary)]">—</p>
+            <p className="mt-1 text-lg md:text-2xl font-medium text-[var(--text-primary)]">—</p>
           )}
         </div>
       </div>
@@ -194,8 +167,11 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
                 return (
                   <div key={cat.category} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", CATEGORY_BADGE[cat.category] ?? CATEGORY_BADGE.Other)}>
-                        {cat.category}
+                      <span
+                        className="rounded-md px-2 py-0.5 text-xs font-medium"
+                        style={{ backgroundColor: `${getCatColor(cat.category)}18`, color: getCatColor(cat.category) }}
+                      >
+                        {getCatConfig(cat.category)?.name ?? cat.category}
                       </span>
                       <div className="flex gap-4 text-right text-xs">
                         <span className="text-[var(--text-tertiary)]">plan: {fmt(cat.planned)}</span>
@@ -228,21 +204,35 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
 
         {/* Category filter chips */}
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
-          {CATEGORY_CHIPS.map(({ label, icon: Icon }) => (
-            <button
-              key={label}
-              onClick={() => setActiveCategory(label)}
-              className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                activeCategory === label
-                  ? "border-matcha-mid bg-matcha-lt dark:bg-[#1E3A1A] text-matcha-dk dark:text-matcha-lt"
-                  : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-matcha-mid hover:text-matcha"
-              )}
-            >
-              {Icon && <Icon className="h-3.5 w-3.5" />}
-              {label}
-            </button>
-          ))}
+          <button
+            onClick={() => setActiveCategory("All")}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+              activeCategory === "All"
+                ? "border-[var(--border-hover)] bg-washi-100 dark:bg-sumi-100 text-[var(--text-primary)] font-medium"
+                : "border-[var(--border-default)] text-[var(--text-secondary)]"
+            )}
+          >
+            All
+          </button>
+          {categories.map(c => {
+            const Icon = getIcon(c.icon);
+            const active = activeCategory === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setActiveCategory(c.id)}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all"
+                style={active
+                  ? { borderColor: c.color, backgroundColor: `${c.color}18`, color: c.color, fontWeight: 500 }
+                  : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                }
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {c.name}
+              </button>
+            );
+          })}
         </div>
 
         {isLoading ? (
@@ -274,15 +264,18 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
                 </p>
                 <div className="space-y-1.5">
                   {expensesByDate[date].map(expense => {
-                    const CatIcon = CATEGORY_ICON[expense.category] ?? Circle;
-                    const iconStyle = CATEGORY_ICON_STYLE[expense.category] ?? CATEGORY_ICON_STYLE.Other;
+                    const CatIcon = getCatIcon(expense.category);
+                    const color = getCatColor(expense.category);
                     return (
                       <div
                         key={expense.id}
                         className="group flex items-center justify-between rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 px-4 py-3 transition-colors hover:bg-washi-50 dark:hover:bg-sumi-50"
                       >
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", iconStyle)}>
+                          <div
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                            style={{ backgroundColor: `${color}18`, color }}
+                          >
                             <CatIcon className="h-4 w-4" />
                           </div>
                           <div className="min-w-0">
@@ -295,7 +288,7 @@ export default function ExpensesPage({ params }: { params: { id: string } }) {
                         <div className="ml-3 flex shrink-0 items-center gap-2">
                           <span className="text-xs text-[var(--text-tertiary)]">{expense.date}</span>
                           <span className="text-sm font-medium text-[var(--text-primary)]">{fmt(expense.amount)}</span>
-                          <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="flex items-center opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                             <Button
                               variant="ghost"
                               size="icon"

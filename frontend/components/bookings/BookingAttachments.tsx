@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Paperclip, Trash2, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBookingFiles, useUploadBookingFile, useDeleteBookingFile } from "@/hooks/usePhotos";
+import { mediaUrl } from "@/lib/media";
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -58,7 +59,7 @@ export function BookingAttachments({ tripId, bookingId }: BookingAttachmentsProp
                 <span className="shrink-0 text-xs text-[var(--text-tertiary)]">{formatSize(file.file_size)}</span>
               </div>
               <div className="ml-2 flex shrink-0 gap-1">
-                <a href={file.url} target="_blank" rel="noopener noreferrer">
+                <a href={mediaUrl(file.url)} target="_blank" rel="noopener noreferrer">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
                     <Download className="h-3 w-3" />
                   </Button>

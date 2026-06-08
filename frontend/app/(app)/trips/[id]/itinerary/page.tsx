@@ -80,7 +80,7 @@ export default function ItineraryPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link href={`/trips/${tripId}`}>
             <Button variant="ghost" size="icon" className="h-8 w-8"><ArrowLeft className="h-4 w-4" /></Button>
@@ -90,7 +90,7 @@ export default function ItineraryPage({ params }: { params: { id: string } }) {
             <p className="text-sm text-muted-foreground">{days.length} {days.length === 1 ? "day" : "days"} planned</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           {/* View toggle */}
           <div className="flex rounded-xl border border-[var(--border-default)] bg-washi-100 dark:bg-sumi-100 p-0.5">
             <button
@@ -150,69 +150,71 @@ export default function ItineraryPage({ params }: { params: { id: string } }) {
           onEditActivity={(activity) => setEditingActivity(activity)}
         />
       ) : (
-        <div className="flex gap-6">
-          {/* Day tabs */}
-          <div className="w-44 shrink-0 space-y-1.5">
-            {days.map(day => {
-              const isActive = (selectedDayId ?? days[0]?.id) === day.id;
-              const doneCount = day.activities.filter(a => a.status === "done").length;
-              const totalCount = day.activities.length;
-              const donePercent = totalCount > 0 ? (doneCount / totalCount) * 100 : 0;
+        <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+          {/* Day tabs — horizontal scroll on mobile, vertical sidebar on desktop */}
+          <div className="md:w-44 md:shrink-0">
+            <div className="flex gap-2 overflow-x-auto pb-2 md:flex-col md:space-y-1.5 md:overflow-visible md:pb-0">
+              {days.map(day => {
+                const isActive = (selectedDayId ?? days[0]?.id) === day.id;
+                const doneCount = day.activities.filter(a => a.status === "done").length;
+                const totalCount = day.activities.length;
+                const donePercent = totalCount > 0 ? (doneCount / totalCount) * 100 : 0;
 
-              return (
-                <div key={day.id} className="group relative">
-                  <button
-                    onClick={() => { setSelectedDayId(day.id); setEditingDate(false); }}
-                    className={cn(
-                      "w-full rounded-xl border bg-white dark:bg-sumi-100 px-3 py-2.5 text-left transition-colors",
-                      isActive
-                        ? "border-asagi border-l-[3px]"
-                        : "border-[var(--border-default)] hover:border-[var(--border-hover)]"
-                    )}
-                  >
-                    <p className="text-xs font-medium text-asagi">Day {day.day_number}</p>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                      {new Date(day.date).toLocaleDateString("en", { month: "short", day: "numeric" })}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
-                      {totalCount} {totalCount === 1 ? "activity" : "activities"}
-                    </p>
-                    {totalCount > 0 && (
-                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-washi-100 dark:bg-sumi-50">
-                        <div
-                          className="h-full rounded-full bg-asagi transition-all"
-                          style={{ width: `${donePercent}%` }}
-                        />
-                      </div>
-                    )}
-                  </button>
-                  <Button
-                    variant="ghost" size="icon"
-                    className="absolute -right-1 -top-1 hidden h-5 w-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive group-hover:flex"
-                    onClick={() => {
-                      if (confirm("Delete this day?")) {
-                        deleteDay(day.id);
-                        if (selectedDayId === day.id) setSelectedDayId(null);
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              );
-            })}
+                return (
+                  <div key={day.id} className="group relative shrink-0 md:shrink">
+                    <button
+                      onClick={() => { setSelectedDayId(day.id); setEditingDate(false); }}
+                      className={cn(
+                        "min-w-[80px] rounded-xl border bg-white dark:bg-sumi-100 px-3 py-2.5 text-left transition-colors md:w-full",
+                        isActive
+                          ? "border-asagi border-l-[3px]"
+                          : "border-[var(--border-default)] hover:border-[var(--border-hover)]"
+                      )}
+                    >
+                      <p className="text-xs font-medium text-asagi">Day {day.day_number}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {new Date(day.date).toLocaleDateString("en", { month: "short", day: "numeric" })}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
+                        {totalCount} {totalCount === 1 ? "act" : "acts"}
+                      </p>
+                      {totalCount > 0 && (
+                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-washi-100 dark:bg-sumi-50">
+                          <div
+                            className="h-full rounded-full bg-asagi transition-all"
+                            style={{ width: `${donePercent}%` }}
+                          />
+                        </div>
+                      )}
+                    </button>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="absolute -right-1 -top-1 hidden h-5 w-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive group-hover:flex"
+                      onClick={() => {
+                        if (confirm("Delete this day?")) {
+                          deleteDay(day.id);
+                          if (selectedDayId === day.id) setSelectedDayId(null);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                );
+              })}
 
-            {/* Add day tile */}
-            <button
-              onClick={openAddDay}
-              className="w-full rounded-xl border border-dashed border-[var(--border-hover)] px-3 py-2.5 text-left text-xs text-[var(--text-tertiary)] transition-colors hover:border-asagi hover:text-asagi"
-            >
-              + Add day
-            </button>
+              {/* Add day tile */}
+              <button
+                onClick={openAddDay}
+                className="shrink-0 rounded-xl border border-dashed border-[var(--border-hover)] px-3 py-2.5 text-left text-xs text-[var(--text-tertiary)] transition-colors hover:border-asagi hover:text-asagi md:shrink md:w-full"
+              >
+                + Add day
+              </button>
+            </div>
           </div>
 
           {/* Activities panel */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {selectedDay ? (
               <div className="space-y-3">
                 <div>

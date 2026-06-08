@@ -13,14 +13,6 @@ import { getIcon } from "@/lib/icon-registry";
 import { cn } from "@/lib/utils";
 import type { Place, PlaceCreate } from "@/types/place";
 
-const TYPE_BADGE_CYCLE = [
-  "bg-terracotta-lt dark:bg-[#5A2318] text-terracotta-dk dark:text-terracotta-lt",
-  "bg-kincha-lt dark:bg-[#4A2E08] text-kincha-dk dark:text-kincha-lt",
-  "bg-asagi-lt dark:bg-[#102838] text-asagi-dk dark:text-asagi-lt",
-  "bg-matcha-lt dark:bg-[#1E3A1A] text-matcha-dk dark:text-matcha-lt",
-  "bg-fuji-lt dark:bg-[#3D2840] text-fuji-dk dark:text-fuji-lt",
-  "bg-washi-100 dark:bg-sumi-100 text-washi-600 dark:text-[#A89882]",
-];
 
 function StarRating({ rating, onChange }: { rating: number; onChange?: (r: number) => void }) {
   return (
@@ -77,17 +69,17 @@ function PlaceForm({ defaultValues, onSubmit, isLoading, submitLabel = "Add plac
         <div className="flex flex-wrap gap-2">
           {placeTypes.map(t => {
             const Icon = getIcon(t.icon);
+            const active = type === t.id;
             return (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setType(t.id)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                  type === t.id
-                    ? "border-terracotta bg-terracotta text-white"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-terracotta-mid hover:text-terracotta"
-                )}
+                className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
+                style={active && t.color
+                  ? { borderColor: t.color, backgroundColor: `${t.color}18`, color: t.color }
+                  : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                }
               >
                 <Icon className="h-3.5 w-3.5" />
                 {t.name}
@@ -188,9 +180,8 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
     const cfg = placeTypes.find(t => t.id === typeId);
     return getIcon(cfg?.icon ?? "MapPin");
   }
-  function getTypeBadge(typeId: string) {
-    const idx = placeTypes.findIndex(t => t.id === typeId);
-    return TYPE_BADGE_CYCLE[idx >= 0 ? idx % TYPE_BADGE_CYCLE.length : TYPE_BADGE_CYCLE.length - 1];
+  function getTypeColor(typeId: string) {
+    return placeTypes.find(t => t.id === typeId)?.color ?? "#9E8E7A";
   }
 
   // All type ids that appear in places data — settings order + unknown at end
@@ -202,7 +193,7 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
   return (
     <div className="animate-fade-in space-y-5">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <Link href={`/trips/${tripId}`}>
             <Button variant="ghost" size="icon" className="h-8 w-8 mt-0.5"><ArrowLeft className="h-4 w-4" /></Button>
@@ -228,7 +219,7 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
           </div>
         </div>
         <button
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-terracotta px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-terracotta-mid"
+          className="inline-flex shrink-0 self-end items-center gap-2 rounded-lg bg-terracotta px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-terracotta-mid sm:self-auto"
           onClick={() => setAddOpen(true)}
         >
           <Plus className="h-4 w-4" /> Add place
@@ -251,16 +242,17 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
           </button>
           {filterTypes.map(typeId => {
             const Icon = getTypeIcon(typeId);
+            const active = filter === typeId;
+            const color = getTypeColor(typeId);
             return (
               <button
                 key={typeId}
                 onClick={() => setFilter(typeId)}
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm capitalize transition-colors",
-                  filter === typeId
-                    ? "border-terracotta-mid bg-terracotta-lt dark:bg-[#5A2318] text-terracotta-dk dark:text-terracotta-lt"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-terracotta-mid hover:text-terracotta"
-                )}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm capitalize transition-all"
+                style={active
+                  ? { borderColor: color, backgroundColor: `${color}18`, color, fontWeight: 500 }
+                  : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                }
               >
                 <Icon className="h-3.5 w-3.5" />
                 {getTypeName(typeId)}
@@ -306,7 +298,10 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", getTypeBadge(place.type))}>
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{ backgroundColor: `${getTypeColor(place.type)}18`, color: getTypeColor(place.type) }}
+                  >
                     <Icon className="h-3 w-3" />
                     {getTypeName(place.type)}
                   </span>
@@ -342,7 +337,7 @@ export default function PlacesPage({ params }: { params: { id: string } }) {
 
                 <div className="mt-3 flex items-center justify-between">
                   {(place.rating ?? 0) > 0 ? <StarRating rating={place.rating ?? 0} /> : <span />}
-                  <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="flex items-center gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]" onClick={() => setEditPlace(place)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>

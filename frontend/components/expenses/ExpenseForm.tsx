@@ -54,17 +54,17 @@ export function ExpenseForm({ defaultValues, onSubmit, isLoading, submitLabel = 
         <div className="flex flex-wrap gap-2">
           {categories.map(c => {
             const Icon = getIcon(c.icon);
+            const active = category === c.id;
             return (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setCategory(c.id)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                  category === c.id
-                    ? "border-matcha bg-matcha text-white"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-matcha-mid hover:text-matcha"
-                )}
+                className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
+                style={active && c.color
+                  ? { borderColor: c.color, backgroundColor: `${c.color}18`, color: c.color }
+                  : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                }
               >
                 <Icon className="h-3.5 w-3.5" />
                 {c.name}

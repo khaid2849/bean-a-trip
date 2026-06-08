@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,21 +16,24 @@ interface TypeManagerProps {
   items: ConfigItem[];
   onChange: (items: ConfigItem[]) => void;
   hasDescription?: boolean;
+  hasColor?: boolean;
   accentClass?: string;
 }
 
 interface FormState {
   name: string;
   icon: string;
+  color: string;
   description: string;
 }
 
-const EMPTY_FORM: FormState = { name: "", icon: "Circle", description: "" };
+const EMPTY_FORM: FormState = { name: "", icon: "Circle", color: "#4E7A8F", description: "" };
 
 export function TypeManager({
   items,
   onChange,
   hasDescription = false,
+  hasColor = false,
   accentClass = "bg-terracotta text-white hover:bg-terracotta-mid",
 }: TypeManagerProps) {
   const [addOpen,  setAddOpen]  = useState(false);
@@ -43,7 +46,7 @@ export function TypeManager({
   }
 
   function openEdit(item: ConfigItem) {
-    setForm({ name: item.name, icon: item.icon, description: item.description ?? "" });
+    setForm({ name: item.name, icon: item.icon, color: item.color ?? "#9E8E7A", description: item.description ?? "" });
     setEditItem(item);
   }
 
@@ -52,7 +55,7 @@ export function TypeManager({
     const id = makeId(form.name, items.map(i => i.id));
     onChange([
       ...items,
-      { id, name: form.name.trim(), icon: form.icon, description: form.description || undefined },
+      { id, name: form.name.trim(), icon: form.icon, color: hasColor ? form.color : undefined, description: form.description || undefined },
     ]);
     setAddOpen(false);
   }
@@ -62,7 +65,7 @@ export function TypeManager({
     onChange(
       items.map(i =>
         i.id === editItem.id
-          ? { ...i, name: form.name.trim(), icon: form.icon, description: form.description || undefined }
+          ? { ...i, name: form.name.trim(), icon: form.icon, color: hasColor ? form.color : i.color, description: form.description || undefined }
           : i
       )
     );
@@ -86,10 +89,24 @@ export function TypeManager({
             >
               <GripVertical className="h-4 w-4 shrink-0 text-[var(--text-tertiary)] opacity-0 group-hover:opacity-60" />
 
-              {/* Icon badge */}
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-washi-100 dark:bg-sumi-50">
-                <Icon className="h-4 w-4 text-[var(--text-secondary)]" />
+              {/* Icon badge — tinted with the type color when available */}
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+                style={hasColor && item.color ? { backgroundColor: `${item.color}20` } : undefined}
+              >
+                <Icon
+                  className="h-4 w-4"
+                  style={hasColor && item.color ? { color: item.color } : { color: "var(--text-secondary)" }}
+                />
               </div>
+
+              {/* Color swatch (activity types only) */}
+              {hasColor && item.color && (
+                <div
+                  className="h-3 w-3 shrink-0 rounded-full border border-white/30 shadow-sm"
+                  style={{ backgroundColor: item.color }}
+                />
+              )}
 
               {/* Name + description */}
               <div className="min-w-0 flex-1">
@@ -146,6 +163,7 @@ export function TypeManager({
         form={form}
         setForm={setForm}
         hasDescription={hasDescription}
+        hasColor={hasColor}
         onConfirm={handleAdd}
         confirmLabel="Add"
         accentClass={accentClass}
@@ -159,6 +177,7 @@ export function TypeManager({
         form={form}
         setForm={setForm}
         hasDescription={hasDescription}
+        hasColor={hasColor}
         onConfirm={handleEdit}
         confirmLabel="Save"
         accentClass={accentClass}
@@ -167,8 +186,15 @@ export function TypeManager({
   );
 }
 
+// Preset palette for quick color selection
+const COLOR_PRESETS = [
+  "#C0533A", "#C48A3F", "#4A6741", "#4E7A8F", "#8B6B8A",
+  "#3A7A6A", "#6B7A3A", "#4E6A8F", "#8F4E6A", "#7A3A3A",
+  "#5A6A7A", "#9E8E7A", "#7A5A3A", "#3A5A7A", "#6A3A7A",
+];
+
 function TypeFormDialog({
-  open, onOpenChange, title, form, setForm, hasDescription, onConfirm, confirmLabel, accentClass,
+  open, onOpenChange, title, form, setForm, hasDescription, hasColor, onConfirm, confirmLabel, accentClass,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -176,10 +202,12 @@ function TypeFormDialog({
   form: FormState;
   setForm: (f: FormState) => void;
   hasDescription: boolean;
+  hasColor: boolean;
   onConfirm: () => void;
   confirmLabel: string;
   accentClass: string;
 }) {
+  const colorInputRef = useRef<HTMLInputElement>(null);
   const PreviewIcon = getIcon(form.icon);
 
   return (
@@ -191,12 +219,20 @@ function TypeFormDialog({
 
         <div className="space-y-4">
           {/* Preview */}
-          <div className="flex items-center gap-3 rounded-xl bg-washi-50 dark:bg-sumi-50 border border-[var(--border-default)] px-4 py-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-washi-100 dark:bg-sumi-100">
-              <PreviewIcon className="h-5 w-5 text-[var(--text-secondary)]" />
+          <div className="flex items-center gap-3 rounded-xl border border-[var(--border-default)] px-4 py-3"
+            style={hasColor && form.color ? { backgroundColor: `${form.color}10`, borderLeftColor: form.color, borderLeftWidth: 3 } : { backgroundColor: "var(--bg-subtle)" }}
+          >
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-lg"
+              style={hasColor && form.color ? { backgroundColor: `${form.color}20` } : { backgroundColor: "var(--bg-muted)" }}
+            >
+              <PreviewIcon
+                className="h-5 w-5"
+                style={hasColor && form.color ? { color: form.color } : { color: "var(--text-secondary)" }}
+              />
             </div>
-            <span className="text-sm font-medium text-[var(--text-primary)]">
-              {form.name || <span className="text-[var(--text-tertiary)]">Type name</span>}
+            <span className="text-sm font-medium" style={hasColor && form.color ? { color: form.color } : { color: "var(--text-primary)" }}>
+              {form.name || <span style={{ color: "var(--text-tertiary)" }}>Type name</span>}
             </span>
           </div>
 
@@ -221,6 +257,50 @@ function TypeFormDialog({
                 value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })}
               />
+            </div>
+          )}
+
+          {/* Color picker (activity types only) */}
+          {hasColor && (
+            <div className="space-y-1.5">
+              <Label>Color</Label>
+              {/* Preset swatches */}
+              <div className="flex flex-wrap gap-2">
+                {COLOR_PRESETS.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setForm({ ...form, color: c })}
+                    className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
+                    style={{
+                      backgroundColor: c,
+                      borderColor: form.color === c ? "white" : "transparent",
+                      boxShadow: form.color === c ? `0 0 0 2px ${c}` : "none",
+                    }}
+                  />
+                ))}
+                {/* Custom color input */}
+                <button
+                  type="button"
+                  onClick={() => colorInputRef.current?.click()}
+                  className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-[var(--border-hover)] text-[8px] font-bold text-[var(--text-tertiary)] transition-colors hover:border-[var(--text-secondary)]"
+                  title="Custom color"
+                >
+                  +
+                </button>
+                <input
+                  ref={colorInputRef}
+                  type="color"
+                  value={form.color}
+                  onChange={e => setForm({ ...form, color: e.target.value })}
+                  className="sr-only"
+                />
+              </div>
+              {/* Current color hex display */}
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-5 rounded-md border border-[var(--border-default)]" style={{ backgroundColor: form.color }} />
+                <span className="font-mono text-xs text-[var(--text-tertiary)]">{form.color}</span>
+              </div>
             </div>
           )}
 

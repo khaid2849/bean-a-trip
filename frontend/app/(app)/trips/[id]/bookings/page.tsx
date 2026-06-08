@@ -61,17 +61,17 @@ function BookingForm({ defaultValues, onSubmit, isLoading, submitLabel = "Add bo
         <div className="flex flex-wrap gap-2">
           {bookingTypes.map(t => {
             const Icon = getIcon(t.icon);
+            const active = type === t.id;
             return (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setType(t.id)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                  type === t.id
-                    ? "border-kincha bg-kincha text-white"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-kincha-mid hover:text-kincha"
-                )}
+                className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
+                style={active && t.color
+                  ? { borderColor: t.color, backgroundColor: `${t.color}18`, color: t.color }
+                  : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                }
               >
                 <Icon className="h-3.5 w-3.5" />
                 {t.name}
@@ -169,10 +169,13 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
     const cfg = bookingTypes.find(t => t.id === typeId);
     return getIcon(cfg?.icon ?? "Package");
   }
+  function getTypeColor(typeId: string) {
+    return bookingTypes.find(t => t.id === typeId)?.color ?? "#9E8E7A";
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link href={`/trips/${tripId}`}><Button variant="ghost" size="icon" className="h-8 w-8"><ArrowLeft className="h-4 w-4" /></Button></Link>
           <div>
@@ -181,7 +184,7 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
           </div>
         </div>
         <button
-          className="inline-flex items-center gap-2 rounded-lg bg-kincha px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-kincha-mid"
+          className="inline-flex self-end items-center gap-2 rounded-lg bg-kincha px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-kincha-mid sm:self-auto"
           onClick={() => setAddOpen(true)}
         >
           <Plus className="h-4 w-4" /> Add booking
@@ -205,7 +208,7 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
             return (
               <div key={typeId}>
                 <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-[var(--text-secondary)]">
-                  <Icon className="h-4 w-4 text-kincha" /> {getTypeName(typeId)}
+                  <Icon className="h-4 w-4" style={{ color: getTypeColor(typeId) }} /> {getTypeName(typeId)}
                 </h3>
                 <div className="space-y-2">
                   {grouped[typeId].map(booking => {
@@ -214,7 +217,10 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
                       <div key={booking.id} className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-4 transition-colors hover:border-kincha-mid">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
-                            <div className="mt-0.5 inline-flex shrink-0 rounded-lg p-2 bg-kincha-lt dark:bg-[#4A2E08] text-kincha">
+                            <div
+                              className="mt-0.5 inline-flex shrink-0 rounded-lg p-2"
+                              style={{ backgroundColor: `${getTypeColor(booking.type)}18`, color: getTypeColor(booking.type) }}
+                            >
                               <BIcon className="h-4 w-4" />
                             </div>
                             <div>
@@ -227,7 +233,7 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
                               {booking.provider && <p className="text-sm text-[var(--text-secondary)]">{booking.provider}</p>}
                               {booking.confirmation_number && <p className="text-sm text-[var(--text-secondary)]">#{booking.confirmation_number}</p>}
                               {(booking.check_in || booking.check_out) && (
-                                <p className="mt-1 text-sm font-medium text-kincha dark:text-kincha-mid">
+                                <p className="mt-1 text-sm font-medium" style={{ color: getTypeColor(booking.type) }}>
                                   {booking.check_in && new Date(booking.check_in).toLocaleDateString("en", { month: "short", day: "numeric" })}
                                   {booking.check_in && booking.check_out ? " → " : ""}
                                   {booking.check_out && new Date(booking.check_out).toLocaleDateString("en", { month: "short", day: "numeric" })}

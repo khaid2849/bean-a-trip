@@ -88,7 +88,7 @@ function CategorySection({ tripId, category, items }: { tripId: string; category
             </span>
             <button
               onClick={() => deleteItem(item.id)}
-              className="opacity-0 transition-opacity group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-[var(--text-danger)]"
+              className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-[var(--text-danger)]"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

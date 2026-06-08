@@ -129,12 +129,13 @@ export default function SettingsPage() {
           {active === "activityTypes" && (
             <SectionWrapper
               title="Activity Types"
-              description="Types available when adding activities to your itinerary. Shown as icon + name."
+              description="Types available when adding activities to your itinerary. Each type has its own color, icon, and name."
             >
               <TypeManager
                 items={settings.activityTypes}
                 onChange={updateActivityTypes}
                 hasDescription
+                hasColor
               />
             </SectionWrapper>
           )}
@@ -142,11 +143,12 @@ export default function SettingsPage() {
           {active === "expenseCategories" && (
             <SectionWrapper
               title="Expense Categories"
-              description="Categories available in the expense form. Shown as icon + name."
+              description="Categories available in the expense form. Each category has its own color, icon, and name."
             >
               <TypeManager
                 items={settings.expenseCategories}
                 onChange={updateExpenseCategories}
+                hasColor
                 accentClass="bg-matcha hover:bg-matcha-mid text-white"
               />
             </SectionWrapper>
@@ -155,11 +157,12 @@ export default function SettingsPage() {
           {active === "bookingTypes" && (
             <SectionWrapper
               title="Booking Types"
-              description="Types available when adding a booking (flight, hotel, etc.). Shown as icon + name."
+              description="Types available when adding a booking (flight, hotel, etc.). Each type has its own color, icon, and name."
             >
               <TypeManager
                 items={settings.bookingTypes}
                 onChange={updateBookingTypes}
+                hasColor
                 accentClass="bg-kincha hover:bg-kincha-mid text-white"
               />
             </SectionWrapper>
@@ -168,11 +171,12 @@ export default function SettingsPage() {
           {active === "placeTypes" && (
             <SectionWrapper
               title="Place Types"
-              description="Types available when saving a place (attraction, restaurant, etc.). Shown as icon + name."
+              description="Types available when saving a place (attraction, restaurant, etc.). Each type has its own color, icon, and name."
             >
               <TypeManager
                 items={settings.placeTypes}
                 onChange={updatePlaceTypes}
+                hasColor
               />
             </SectionWrapper>
           )}

@@ -6,6 +6,7 @@ import type { Trip } from "@/types/trip";
 import { getDaysUntil, formatDateRange, getTripDuration, STATUS_LABEL, STATUS_COLOR } from "@/lib/trip-utils";
 import { useToggleFavoriteTrip } from "@/hooks/useTrips";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media";
 
 interface TripCardProps {
   trip: Trip;
@@ -42,7 +43,7 @@ export function TripCard({ trip, hero = false }: TripCardProps) {
         {trip.cover_photo_url ? (
           <div className={cn("relative flex-shrink-0 overflow-hidden", hero ? "h-32" : "h-24")}>
             <img
-              src={trip.cover_photo_url}
+              src={mediaUrl(trip.cover_photo_url)}
               alt={trip.name}
               className="h-full w-full object-cover"
               loading="lazy"
