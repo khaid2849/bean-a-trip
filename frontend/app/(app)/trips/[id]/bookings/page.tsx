@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBookings, useCreateBooking, useUpdateBooking, useDeleteBooking } from "@/hooks/useBookings";
+import { useTrip } from "@/hooks/useTrips";
+import { formatAmount } from "@/lib/trip-utils";
 import { BookingAttachments } from "@/components/bookings/BookingAttachments";
 import { useSettings } from "@/context/SettingsContext";
 import { getIcon } from "@/lib/icon-registry";
@@ -141,7 +143,9 @@ function EditBookingDialog({ tripId, booking, onClose }: { tripId: string; booki
 
 export default function BookingsPage({ params }: { params: { id: string } }) {
   const { id: tripId } = params;
+  const { data: trip } = useTrip(tripId);
   const { data: bookings = [], isLoading } = useBookings(tripId);
+  const currency = trip?.currency ?? "VND";
   const { mutateAsync: createBooking, isPending: isCreating } = useCreateBooking(tripId);
   const { mutateAsync: deleteBooking } = useDeleteBooking(tripId);
   const { settings } = useSettings();
@@ -243,7 +247,7 @@ export default function BookingsPage({ params }: { params: { id: string } }) {
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
-                            {booking.amount && <span className="text-sm font-medium text-[var(--text-primary)]">${booking.amount.toFixed(2)}</span>}
+                            {booking.amount && <span className="text-sm font-medium text-[var(--text-primary)]">{formatAmount(booking.amount, currency)}</span>}
                             <Button variant="ghost" size="icon" className="h-7 w-7 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]" onClick={() => setEditBooking(booking)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>

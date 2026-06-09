@@ -50,6 +50,40 @@ export function getDestinationGradient(destination: string): string {
   return DESTINATION_GRADIENTS[hash % DESTINATION_GRADIENTS.length];
 }
 
+export interface CurrencyConfig {
+  code: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+}
+
+export const CURRENCIES: CurrencyConfig[] = [
+  { code: "VND", symbol: "₫",   name: "Vietnamese Dong",    decimals: 0 },
+  { code: "USD", symbol: "$",   name: "US Dollar",          decimals: 2 },
+  { code: "EUR", symbol: "€",   name: "Euro",               decimals: 2 },
+  { code: "JPY", symbol: "¥",   name: "Japanese Yen",       decimals: 0 },
+  { code: "CNY", symbol: "¥",   name: "Chinese Yuan",       decimals: 2 },
+  { code: "KRW", symbol: "₩",   name: "South Korean Won",   decimals: 0 },
+  { code: "THB", symbol: "฿",   name: "Thai Baht",          decimals: 2 },
+  { code: "SGD", symbol: "S$",  name: "Singapore Dollar",   decimals: 2 },
+  { code: "GBP", symbol: "£",   name: "British Pound",      decimals: 2 },
+  { code: "AUD", symbol: "A$",  name: "Australian Dollar",  decimals: 2 },
+  { code: "HKD", symbol: "HK$", name: "Hong Kong Dollar",   decimals: 2 },
+];
+
+export function getCurrencyConfig(code: string): CurrencyConfig {
+  return CURRENCIES.find(c => c.code === code) ?? CURRENCIES[0];
+}
+
+export function formatAmount(n: number, currency: string): string {
+  const cfg = getCurrencyConfig(currency);
+  const formatted = Number(n).toLocaleString("en", {
+    minimumFractionDigits: cfg.decimals,
+    maximumFractionDigits: cfg.decimals,
+  });
+  return `${cfg.symbol}${formatted}`;
+}
+
 export const TRIP_COVER_COLORS = [
   '#C0533A', // Terracotta
   '#4A6741', // Matcha

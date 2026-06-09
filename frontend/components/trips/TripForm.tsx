@@ -5,7 +5,7 @@ import { ImageIcon, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TRIP_COVER_COLORS } from "@/lib/trip-utils";
+import { TRIP_COVER_COLORS, CURRENCIES } from "@/lib/trip-utils";
 import type { TripCreate, TripStatus } from "@/types/trip";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,9 @@ export function TripForm({
   const [notes, setNotes] = useState(defaultValues?.notes ?? "");
   const [color, setColor] = useState(defaultValues?.cover_color ?? TRIP_COVER_COLORS[0]);
   const [status, setStatus] = useState<TripStatus>(defaultValues?.status ?? "planning");
+  const [currency, setCurrency] = useState(defaultValues?.currency ?? "VND");
+  const [lat, setLat] = useState<string>(defaultValues?.lat != null ? String(defaultValues.lat) : "");
+  const [lng, setLng] = useState<string>(defaultValues?.lng != null ? String(defaultValues.lng) : "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -50,7 +53,12 @@ export function TripForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSubmit({ name, destination, cover_color: color, start_date: startDate, end_date: endDate, status, notes: notes || undefined });
+    onSubmit({
+      name, destination, cover_color: color, start_date: startDate, end_date: endDate,
+      status, notes: notes || undefined, currency,
+      lat: lat !== "" ? parseFloat(lat) : null,
+      lng: lng !== "" ? parseFloat(lng) : null,
+    });
   }
 
   const canManagePhoto = !!onUploadCoverPhoto;
@@ -154,6 +162,28 @@ export function TripForm({
       </div>
 
       <div className="space-y-1.5">
+        <Label>Currency</Label>
+        <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+          {CURRENCIES.map(c => (
+            <button
+              key={c.code}
+              type="button"
+              onClick={() => setCurrency(c.code)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
+                currency === c.code
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-[var(--border-default)] hover:bg-muted text-[var(--text-secondary)]"
+              )}
+            >
+              <span className="text-sm leading-none">{c.symbol}</span>
+              {c.code}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
         <Label>Cover color</Label>
         <div className="flex gap-2">
           {TRIP_COVER_COLORS.map(c => (
@@ -171,6 +201,27 @@ export function TripForm({
       <div className="space-y-1.5">
         <Label>Notes <span className="text-muted-foreground">(optional)</span></Label>
         <Input placeholder="Any notes about this trip…" value={notes} onChange={e => setNotes(e.target.value)} />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Globe pin <span className="text-muted-foreground">(optional)</span></Label>
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            type="number"
+            step="any"
+            placeholder="Latitude (e.g. 35.6762)"
+            value={lat}
+            onChange={e => setLat(e.target.value)}
+          />
+          <Input
+            type="number"
+            step="any"
+            placeholder="Longitude (e.g. 139.6503)"
+            value={lng}
+            onChange={e => setLng(e.target.value)}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">Leave blank to auto-detect from destination name.</p>
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>

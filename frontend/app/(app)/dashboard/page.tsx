@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Globe, Calendar, Clock, Map, CheckCircle, PenLine } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Globe, Globe2, List, Calendar, Clock, Map, CheckCircle, PenLine } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BentoGrid } from "@/components/bento/BentoGrid";
 import { BentoCard } from "@/components/bento/BentoCard";
@@ -10,13 +12,20 @@ import { CreateTripDialog } from "@/components/trips/CreateTripDialog";
 import { useTrips } from "@/hooks/useTrips";
 import { useItinerary } from "@/hooks/useItinerary";
 import { useExpenseSummary } from "@/hooks/useExpenses";
-import { getDaysUntil } from "@/lib/trip-utils";
+import { getDaysUntil, formatAmount } from "@/lib/trip-utils";
 import { cn } from "@/lib/utils";
 import type { Trip } from "@/types/trip";
 
-function fmt(n: number) { return `$${Number(n).toFixed(0)}`; }
+const GlobeView = dynamic(
+  () => import("@/components/globe/GlobeView").then(m => ({ default: m.GlobeView })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[560px] w-full rounded-2xl" />,
+  }
+);
 
 function ActiveTripWidgets({ trip }: { trip: Trip }) {
+  function fmt(n: number) { return formatAmount(n, trip.currency); }
   const { data: days = [] } = useItinerary(trip.id);
   const { data: summary } = useExpenseSummary(trip.id);
 
@@ -110,6 +119,7 @@ function ActiveTripWidgets({ trip }: { trip: Trip }) {
 
 export default function DashboardPage() {
   const { data: trips = [], isLoading } = useTrips();
+  const [view, setView] = useState<"list" | "globe">("list");
 
   const activeTrip = trips.find(t => t.status === "active");
   const upcomingTrips = trips.filter(t => t.status === "planning").sort((a, b) => {
@@ -133,7 +143,35 @@ export default function DashboardPage() {
               : `${trips.length} trip${trips.length > 1 ? "s" : ""} total`}
           </p>
         </div>
-        <CreateTripDialog />
+        <div className="flex items-center gap-2">
+          {trips.length > 0 && (
+            <div className="hidden md:flex rounded-lg border border-[var(--border-default)] bg-washi-50 dark:bg-sumi-100 p-0.5">
+              <button
+                onClick={() => setView("list")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  view === "list"
+                    ? "bg-white dark:bg-sumi-50 shadow-sm text-[var(--text-primary)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                )}
+              >
+                <List className="h-3.5 w-3.5" /> List
+              </button>
+              <button
+                onClick={() => setView("globe")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  view === "globe"
+                    ? "bg-white dark:bg-sumi-50 shadow-sm text-[var(--text-primary)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                )}
+              >
+                <Globe2 className="h-3.5 w-3.5" /> Globe
+              </button>
+            </div>
+          )}
+          <CreateTripDialog />
+        </div>
       </div>
 
       {isLoading ? (
@@ -150,6 +188,8 @@ export default function DashboardPage() {
         </div>
       ) : trips.length === 0 ? (
         <EmptyState />
+      ) : view === "globe" ? (
+        <GlobeView trips={trips} />
       ) : (
         <div className="space-y-8">
           {/* Stats row */}

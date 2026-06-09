@@ -19,10 +19,11 @@ import { useChecklist } from "@/hooks/useChecklist";
 import { useNotes } from "@/hooks/useNotes";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useWeather } from "@/hooks/useWeather";
-import { getDaysUntil, formatDateRange, getTripDuration } from "@/lib/trip-utils";
+import { getDaysUntil, formatDateRange, getTripDuration, formatAmount } from "@/lib/trip-utils";
 import { cn } from "@/lib/utils";
 import { mediaUrl } from "@/lib/media";
 import type { Trip } from "@/types/trip";
+import type { ExpenseSummary } from "@/types/expense";
 
 // ── WMO weather codes ────────────────────────────────────────────────────────
 const WMO: Record<number, { label: string; emoji: string }> = {
@@ -85,7 +86,7 @@ function MiniBar({ value, color }: { value: number; color: string }) {
 
 // ── Countdown ────────────────────────────────────────────────────────────────
 function calcLeft(dateStr: string) {
-  const diff = new Date(dateStr).getTime() - Date.now();
+  const diff = new Date(dateStr + 'T00:00:00').getTime() - Date.now();
   if (diff <= 0) return null;
   const s = Math.floor(diff / 1000);
   return {
@@ -139,6 +140,90 @@ function CountdownCard({ startDate }: { startDate: string }) {
   );
 }
 
+// ── Budget overview card ──────────────────────────────────────────────────────
+function BudgetOverviewCard({
+  summary,
+  currency,
+  tripId,
+}: {
+  summary: ExpenseSummary | undefined;
+  currency: string;
+  tripId: string;
+}) {
+  const hasBudget = summary && summary.total_budget > 0;
+  const pct = hasBudget
+    ? Math.min(Math.round((summary.total_spent / summary.total_budget) * 100), 100)
+    : 0;
+  const over = hasBudget && summary.remaining < 0;
+
+  const metrics = hasBudget
+    ? [
+        { label: "Total budget", value: formatAmount(summary.total_budget, currency),          cls: "" },
+        { label: "Spent",        value: formatAmount(summary.total_spent, currency),           cls: "text-kincha" },
+        { label: "Remaining",    value: formatAmount(Math.abs(summary.remaining), currency),   cls: over ? "text-[var(--text-danger)]" : "text-matcha" },
+        { label: "% used",       value: `${pct}%`,                                            cls: "" },
+      ]
+    : [];
+
+  return (
+    <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-sumi-100 p-5">
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Wallet className="h-4 w-4 text-[var(--text-tertiary)]" />
+          <span className="text-sm font-medium text-[var(--text-primary)]">Budget overview</span>
+        </div>
+        <Link href={`/trips/${tripId}/expenses`} className="text-xs text-matcha hover:underline">
+          View expenses →
+        </Link>
+      </div>
+
+      {hasBudget ? (
+        <>
+          {/* Four metric mini-cards */}
+          <div className="mb-4 grid grid-cols-4 gap-2">
+            {metrics.map(({ label, value, cls }) => (
+              <div
+                key={label}
+                className="rounded-lg border border-[var(--border-default)] bg-washi-50 dark:bg-sumi-50 px-3 py-2.5"
+              >
+                <p className="text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">{label}</p>
+                <p className={cn("mt-1 truncate text-sm font-medium tabular-nums leading-tight text-[var(--text-primary)]", cls)}>
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          <div>
+            <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-washi-100 dark:bg-sumi-50">
+              <div
+                className={cn("h-full rounded-full transition-all duration-500", over ? "bg-terracotta" : "bg-matcha")}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-[var(--text-tertiary)]">{formatAmount(0, currency)}</span>
+              <span className="font-medium text-[var(--text-secondary)]">
+                {formatAmount(summary.total_spent, currency)} spent
+              </span>
+              <span className="text-[var(--text-tertiary)]">{formatAmount(summary.total_budget, currency)}</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-[var(--text-tertiary)]">
+          No budget set yet.{" "}
+          <Link href={`/trips/${tripId}/expenses`} className="text-matcha hover:underline">
+            Set one up →
+          </Link>
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function TripPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -168,7 +253,7 @@ export default function TripPage({ params }: { params: { id: string } }) {
   const journalCount = photos.length + notes.length;
 
   const showWeather   = trip?.status === "planning" || trip?.status === "active";
-  const showCountdown = trip?.status === "planning" && getDaysUntil(trip.start_date) > 0;
+  const showCountdown = trip?.status === "planning" && getDaysUntil(trip.start_date) >= 0;
   const showTimeline  = showCountdown || showWeather;
 
   const {
@@ -305,7 +390,7 @@ export default function TripPage({ params }: { params: { id: string } }) {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.08) 55%, transparent 100%)" }} />
 
         {/* top-right controls */}
-        <div className="absolute right-3 top-3 flex items-center gap-1.5">
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5">
           <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", STATUS_BADGE[trip.status])}>
             {STATUS_LABEL[trip.status]}
           </span>
@@ -432,6 +517,9 @@ export default function TripPage({ params }: { params: { id: string } }) {
           )}
         </div>
       )}
+
+      {/* ── Budget overview ──────────────────────────────────────────────── */}
+      <BudgetOverviewCard summary={summary} currency={trip.currency} tripId={id} />
 
       {/* ── Section grid ─────────────────────────────────────────────────── */}
       <div>

@@ -12,12 +12,12 @@ import { BudgetSetup } from "@/components/expenses/BudgetSetup";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { EditExpenseDialog } from "@/components/expenses/EditExpenseDialog";
 import { useExpenses, useExpenseSummary, useCreateExpense, useDeleteExpense } from "@/hooks/useExpenses";
+import { useTrip } from "@/hooks/useTrips";
 import { useSettings } from "@/context/SettingsContext";
+import { formatAmount } from "@/lib/trip-utils";
 import { getIcon } from "@/lib/icon-registry";
 import { cn } from "@/lib/utils";
 import type { Expense } from "@/types/expense";
-
-function fmt(n: number) { return `$${Number(n).toFixed(2)}`; }
 
 function formatDateHeader(date: string): string {
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
@@ -27,8 +27,11 @@ function formatDateHeader(date: string): string {
 
 export default function ExpensesPage({ params }: { params: { id: string } }) {
   const { id: tripId } = params;
+  const { data: trip } = useTrip(tripId);
   const { data, isLoading } = useExpenses(tripId);
   const { data: summary } = useExpenseSummary(tripId);
+  const currency = trip?.currency ?? "VND";
+  function fmt(n: number) { return formatAmount(n, currency); }
   const { mutateAsync: createExpense, isPending: isExpenseCreating } = useCreateExpense(tripId);
   const { mutateAsync: deleteExpense } = useDeleteExpense(tripId);
   const { settings } = useSettings();

@@ -11,6 +11,9 @@ export interface Trip {
   status: TripStatus;
   notes: string | null;
   is_favorite: boolean;
+  currency: string;
+  lat: number | null;
+  lng: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,6 +26,9 @@ export interface TripCreate {
   end_date: string;
   status?: TripStatus;
   notes?: string;
+  currency?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export interface TripUpdate {
@@ -34,4 +40,7 @@ export interface TripUpdate {
   status?: TripStatus;
   notes?: string;
   is_favorite?: boolean;
+  currency?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
